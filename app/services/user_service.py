@@ -1,0 +1,100 @@
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from models.user_model import User
+from sqlalchemy import select
+from schemas.user_schemas import UserCreateSchema, UserUpdateSchema
+from uuid import UUID
+from fastapi import HTTPException, status
+
+class UserCreateManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create_user(self, user: UserCreateSchema) -> User:
+        existing_user = self.db.query(User).filter(
+            (User.email == user.email) | (User.username == user.username)
+        ).first()
+
+        if existing_user:
+            if existing_user.email == user.email:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Email already registered"
+                )
+            else:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Username already taken"
+                )
+        db_user = User(
+            email=user.email,
+            username=user.username,
+            password=user.password
+        )
+        try:
+            self.db.add(db_user)
+            self.db.commit()
+            self.db.refresh(db_user)
+            return db_user
+        except IntegrityError:
+            self.db.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="User already exists"
+            )
+
+class UserGetManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_user(self, user_id: UUID) -> User:
+        return self.db.query(User).filter(User.id == user_id).first()
+
+    def get_all_users(self) -> list[User]:
+        return self.db.query(User).all()
+
+class UserLoginManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    async def login_user(self, username: str, password: str):
+        stmt = select(User).where(User.username == username)
+        result = await self.db.execute(stmt)
+        user = result.scalars().first()
+
+class UserUpdateManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def update_user(self, id: str, user: UserUpdateSchema) -> User:
+        existing_user = self.db.query(User).filter(User.id == id).first()
+        if not existing_user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        if user.email:
+            email_conflict = self.db.query(User).filter(
+                User.email == user.email,
+                User.id != id
+            ).first()
+            if email_conflict:
+                raise HTTPException(status_code=400, detail="Email is already registered")
+
+        if user.username:
+            username_conflict = self.db.query(User).filter(
+                User.username == user.username,
+                User.id != id
+            ).first()
+            if username_conflict:
+                raise HTTPException(status_code=400, detail="Username is already registered")
+
+        update_data = user.dict(exclude_unset=True)
+        for field, value in update_data.items():
+            setattr(existing_user, field, value)
+
+        try:
+            self.db.commit()
+            self.db.refresh(existing_user)
+            return existing_user
+        except IntegrityError:
+            self.db.rollback()
+            raise HTTPException(status_code=400, detail="Database integrity error")
