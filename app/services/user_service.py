@@ -57,10 +57,11 @@ class UserLoginManager:
     def __init__(self, db: Session):
         self.db = db
 
-    async def login_user(self, username: str, password: str):
-        stmt = select(User).where(User.username == username)
-        result = await self.db.execute(stmt)
-        user = result.scalars().first()
+    def login_user(self, username: str, password: str) -> User:
+        user = self.db.query(User).filter(User.username == username).first()
+        if user and user.password == password:
+            return user
+        return None
 
 class UserUpdateManager:
     def __init__(self, db: Session):

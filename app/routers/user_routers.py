@@ -52,7 +52,7 @@ async def login(
     creds: UserLoginSchema = Body(...),
     db: Session = Depends(get_db)
 ):
-    user = await UserLoginManager(db).login_user(creds.username, creds.password)
+    user = UserLoginManager(db).login_user(creds.username, creds.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     

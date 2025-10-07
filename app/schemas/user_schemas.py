@@ -1,5 +1,4 @@
 from pydantic import BaseModel, EmailStr, Field, field_validator, ConfigDict
-from datetime import datetime
 import re
 
 class UserBase(BaseModel):
@@ -47,13 +46,6 @@ class UserLoginResponseSchema(BaseModel):
 
 class UserSchema(UserBase):
     id: int
-    created_at: datetime
-
-class UserSchemaForTasks(BaseModel):
-    id: int
-    username: str
-
-    model_config = ConfigDict(from_attributes=True)
 
 class UserUpdateSchema(UserBase):
     pass
