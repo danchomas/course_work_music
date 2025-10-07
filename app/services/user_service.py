@@ -47,7 +47,7 @@ class UserGetManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_user(self, user_id: UUID) -> User:
+    def get_user(self, user_id: int) -> User:
         return self.db.query(User).filter(User.id == user_id).first()
 
     def get_all_users(self) -> list[User]:

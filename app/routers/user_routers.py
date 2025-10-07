@@ -29,7 +29,7 @@ async def get_users(db: Session = Depends(get_db)) -> List[UserSchema]:
 
 @router.get("/{user_id}", response_model=UserSchema)
 async def get_user_by_id(
-    user_id: UUID = Path(...),
+    user_id: int = Path(...),
     db: Session = Depends(get_db)
 ) -> UserSchema:
     user = UserGetManager(db).get_user(user_id)
