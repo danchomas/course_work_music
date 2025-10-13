@@ -9,6 +9,7 @@ from schemas.profile_schemas import (
 )
 from services.profile_services import (
     ProfileCreateManager,
+    ProfileGetManager
 )
 from core.database import get_db
 from core.security import auth
@@ -22,3 +23,9 @@ def create_profile(
 ) -> ProfileSchema:
     profile = ProfileCreateManager(db).create_profile(new_profile)
     return profile
+
+@router.get("/get_all_profiles")
+def get_all_profiles(
+    db: Session = Depends(get_db)
+) -> List[ProfileSchema]:
+    return ProfileGetManager(db).get_all_profiles()

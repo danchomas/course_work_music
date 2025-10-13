@@ -31,7 +31,7 @@ class ProfileCreateManager:
         return db_profile
 
 class ProfileGetManager():
-    def __init(self, db: Session):
+    def __init__(self, db: Session):
         self.db = db
     
     def get_all_profiles(self) -> list[Profile]:
