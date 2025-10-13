@@ -9,7 +9,8 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from core.database import Base
-from models.user_model import User  # импортируйте все ваши модели
+from models.user_model import User
+from models.profile_model import Profile
 
 # config - это объект конфигурации Alembic
 config = context.config

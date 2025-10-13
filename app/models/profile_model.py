@@ -1,8 +1,9 @@
-from sqlalchemy import Column, String, Integer, Enum
+from sqlalchemy import Column, String, Integer, Enum, ForeignKey
 from sqlalchemy.sql import func
 from core.database import Base
+from enum import Enum as PyEnum
 
-class VerifiedStatus(Enum):
+class VerifiedStatus(PyEnum):
     NOT_VERIFIED = "not_verified"
     CHECK_VERIFIED = "verified_in_progress"
     VERIFIED = "verified"
