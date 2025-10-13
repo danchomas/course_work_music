@@ -36,3 +36,6 @@ class ProfileGetManager():
     
     def get_all_profiles(self) -> list[Profile]:
         return self.db.query(Profile).all()
+    
+    def get_user_profile(self, user_id: int) -> Profile:
+        return self.db.query(Profile).filter(Profile.user_id == user_id)
