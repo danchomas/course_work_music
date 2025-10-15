@@ -26,3 +26,6 @@ class ProfileCreateSchema(ProfileSchema):
         if len(value) > 200:
             raise ValueError('Описание профиля должно содержать не больше 200 символов')
         return value
+
+class ProfileUserSchema(ProfileSchema):
+    user_id: int
