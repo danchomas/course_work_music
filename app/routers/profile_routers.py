@@ -5,7 +5,8 @@ from typing import List
 
 from schemas.profile_schemas import (
     ProfileCreateSchema,
-    ProfileSchema
+    ProfileSchema,
+    ProfileUserSchema
 )
 from services.profile_services import (
     ProfileCreateManager,
@@ -27,5 +28,13 @@ def create_profile(
 @router.get("/get_all_profiles")
 def get_all_profiles(
     db: Session = Depends(get_db)
-) -> List[ProfileSchema]:
+) -> List[ProfileUserSchema]:
     return ProfileGetManager(db).get_all_profiles()
+
+@router.post("/get_my_profile")
+def get_my_profile(
+    db: Session = Depends(get_db),
+    payload: dict = Depends(auth.verify_token)
+) -> ProfileUserSchema:
+    user_id = payload.get("id")
+    return ProfileGetManager(db).get_user_profile(user_id)
