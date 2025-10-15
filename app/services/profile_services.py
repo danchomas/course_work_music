@@ -38,4 +38,10 @@ class ProfileGetManager():
         return self.db.query(Profile).all()
     
     def get_user_profile(self, user_id: int) -> Profile:
-        return self.db.query(Profile).filter(Profile.user_id == user_id)
+        db_profile = self.db.query(Profile).filter(Profile.user_id == user_id).first()
+        if not db_profile:
+            raise HTTPException(
+                status_code=401,
+                detail="Вы пока не зарегистрировали себя как артист"
+            )
+        return db_profile
