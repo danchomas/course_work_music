@@ -1,13 +1,12 @@
 from sqlalchemy import Column, String, Integer, Enum, ForeignKey
-from sqlalchemy.sql import func
 from core.database import Base
 from enum import Enum as PyEnum
+
 
 class VerifiedStatus(PyEnum):
     NOT_VERIFIED = "not_verified"
     CHECK_VERIFIED = "verified_in_progress"
     VERIFIED = "verified"
-
 
 
 class Profile(Base):
@@ -17,6 +16,6 @@ class Profile(Base):
     nickname = Column(String, nullable=False, unique=True)
     bio = Column(String)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True)
-    is_verified = Column(Enum(VerifiedStatus), nullable=False, default=VerifiedStatus.NOT_VERIFIED)
-
-
+    is_verified = Column(
+        Enum(VerifiedStatus), nullable=False, default=VerifiedStatus.NOT_VERIFIED
+    )
