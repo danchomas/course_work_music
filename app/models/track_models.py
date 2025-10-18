@@ -7,7 +7,7 @@ class Track(Base):
     __tablename__ = "tracks"
 
     id = Column(UUID(as_uuid=True), primary_key=True, nullable=False)
-    title = Column(String)
-    cover_url = Column(String, unique=True)
-    music_file_url = Column(String, unique=True)
-    owner = Column(Integer, ForeignKey="profiles.id")
+    title = Column(String, nullable=False)
+    cover_url = Column(String, unique=True, nullable=False)
+    music_file_url = Column(String, unique=True, nullable=False)
+    owner = Column(Integer, ForeignKey="profiles.id", nullable=False)
