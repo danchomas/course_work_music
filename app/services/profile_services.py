@@ -1,10 +1,7 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from models.profile_model import Profile
-from sqlalchemy import select
 from schemas.profile_schemas import ProfileCreateSchema
-from uuid import UUID
-from fastapi import HTTPException, status
+from fastapi import HTTPException
 
 
 class ProfileCreateManager:
