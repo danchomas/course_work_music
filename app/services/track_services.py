@@ -11,10 +11,10 @@ class TrackCreateManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_track(self, track: TrackCreateSchema) -> Track:
+    def create_track(self, track: TrackCreateSchema, owner_id) -> Track:
         existing_track = (
             self.db.query(Track)
-            .filter((Track.owner == track.owner_id and Track.title == track.title))
+            .filter((Track.owner == owner_id and Track.title == track.title))
             .first()
         )
         if existing_track:
@@ -24,9 +24,9 @@ class TrackCreateManager:
             )
         db_track = Track(
             title=track.title,
-            cover_url=f"files/{track.owner_id}/{track.title}/{track.title}.jpg",
-            nusic_file_url=f"files/{track.owner_id}/{track.title}/{track.title}.mp3",
-            owner=track.owner_id,
+            cover_url=f"files/{owner_id}/{track.title}/{track.title}.jpg",
+            nusic_file_url=f"files/{owner_id}/{track.title}/{track.title}.mp3",
+            owner=owner_id,
         )
         self.db.add(db_track)
         self.db.commit()
