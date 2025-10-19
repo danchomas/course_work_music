@@ -1,5 +1,6 @@
 from fastapi import (
     APIRouter,
+    Path,
     UploadFile,
     File,
     Form,
@@ -25,7 +26,7 @@ from schemas.track_schemas import (
     TrackResponseSchema,
 )
 
-from services.track_services import TrackCreateManager
+from services.track_services import TrackCreateManager, TrackPlayManager
 from core.database import get_db
 from core.security import auth
 
@@ -48,14 +49,10 @@ def upload_track(
 
 
 @router.get("/play/{artist_nickname}/{trackname}")
-def play_track(artist_nickname: str, trackname: str):
-    file_path = os.path.join("files", artist_nickname, trackname)
-    if os.path.exists(file_path):
-        for file in os.listdir(file_path):
-            if file.endswith(".mp3"):
-                mp3_file = os.path.join(file_path, file)
-                return FileResponse(mp3_file, media_type="audio/mpeg")
-    else:
-        raise HTTPException(
-            status_code=404, detail="К сожалению данная композиция не была найдена"
-        )
+def play_track(
+    db: Session = Depends(get_db),
+    artist_nickname: str = Path(...),
+    trackname: str = Path(...),
+):
+    track_for_playing = TrackPlayManager(db).play_track(artist_nickname, trackname)
+    return FileResponse(track_for_playing, media_type="audio/mpeg")

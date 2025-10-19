@@ -54,3 +54,20 @@ class TrackCreateManager:
         self.db.commit()
         self.db.refresh(db_track)
         return db_track
+
+
+class TrackPlayManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def play_track(self, artist_nickname, trackname):
+        file_path = os.path.join("files", artist_nickname, trackname)
+        if os.path.exists(file_path):
+            for file in os.listdir(file_path):
+                if file.endswith(".mp3"):
+                    mp3_file = os.path.join(file_path, file)
+                    return mp3_file
+        else:
+            raise HTTPException(
+                status_code=404, detail="К сожалению данная композиция не была найдена"
+            )
