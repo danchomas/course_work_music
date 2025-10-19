@@ -1,20 +1,30 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from models.track_models import Track
+from models.profile_model import Profile
 from sqlalchemy import select
-from schemas.profile_schemas import ProfileCreateSchema
+from schemas.track_schemas import TrackCreateSchema
 from uuid import UUID
-from fastapi import HTTPException, status
+from fastapi import HTTPException
+import os
+
+BASE_DIR = "files"
 
 
 class TrackCreateManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_track(self, track: TrackCreateSchema, owner_id) -> Track:
+    def create_track(self, track: str, user_id, music_file) -> Track:
+        owner = self.db.query(Profile).filter(Profile.user_id == user_id).first()
+        if not owner:
+            raise HTTPException(
+                status_code=401,
+                detail="У вас нету профиля артиста. Перед загрузкой треков, создайте себе профиль",
+            )
         existing_track = (
             self.db.query(Track)
-            .filter((Track.owner == owner_id and Track.title == track.title))
+            .filter(Track.owner == owner.id, Track.title == track)
             .first()
         )
         if existing_track:
@@ -22,11 +32,23 @@ class TrackCreateManager:
                 status_code=409,
                 detail="У вашего профиля был обнаружен трек с таким же названием. Придумайте новое, это не допускается",
             )
+
+        owner_nickname = (
+            self.db.query(Profile.nickname).filter(Profile.id == owner.id).scalar()
+        )
+
+        music_file_path = os.path.join(
+            BASE_DIR, owner_nickname, track, music_file.filename
+        )
+        os.makedirs(os.path.dirname(music_file_path), exist_ok=True)
+
+        with open(music_file_path, "wb") as buffer:
+            buffer.write(music_file.file.read())
+
         db_track = Track(
-            title=track.title,
-            cover_url=f"files/{owner_id}/{track.title}/{track.title}.jpg",
-            nusic_file_url=f"files/{owner_id}/{track.title}/{track.title}.mp3",
-            owner=owner_id,
+            title=track,
+            music_file_url=music_file_path,
+            owner=owner.id,
         )
         self.db.add(db_track)
         self.db.commit()
