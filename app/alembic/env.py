@@ -6,11 +6,13 @@ from alembic import context
 
 # Добавьте импорт ваших моделей и Base
 import sys
+
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from core.database import Base
 from models.user_model import User
 from models.profile_model import Profile
+from models.track_models import Track
 
 # config - это объект конфигурации Alembic
 config = context.config
@@ -19,6 +21,7 @@ config = context.config
 fileConfig(config.config_file_name)
 
 target_metadata = Base.metadata
+
 
 def run_migrations_offline():
     """Запуск миграций в оффлайн режиме."""
@@ -33,6 +36,7 @@ def run_migrations_offline():
     with context.begin_transaction():
         context.run_migrations()
 
+
 def run_migrations_online():
     """Запуск миграций в онлайн режиме."""
     connectable = engine_from_config(
@@ -42,13 +46,11 @@ def run_migrations_online():
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, 
-            target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()
+
 
 if context.is_offline_mode():
     run_migrations_offline()
