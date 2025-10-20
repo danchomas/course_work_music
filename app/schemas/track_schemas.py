@@ -1,4 +1,3 @@
-# schemas/track_schemas.py
 from pydantic import BaseModel
 
 

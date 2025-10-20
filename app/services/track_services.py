@@ -1,10 +1,6 @@
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 from models.track_models import Track
 from models.profile_model import Profile
-from sqlalchemy import select
-from schemas.track_schemas import TrackCreateSchema
-from uuid import UUID
 from fastapi import HTTPException
 import os
 
