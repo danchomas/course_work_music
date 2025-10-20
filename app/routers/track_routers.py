@@ -4,28 +4,12 @@ from fastapi import (
     UploadFile,
     File,
     Form,
-    Query,
     Depends,
-    HTTPException,
-    Security,
-    Body,
 )
-from fastapi.routing import APIRoute
 from fastapi.responses import JSONResponse, FileResponse
-from pydantic.root_model import RootModelRootType
 from sqlalchemy.orm import Session
-from uuid import UUID
-from typing import List
-import os
-
-from starlette.types import HTTPExceptionHandler
 
 from routers.user_routers import router
-from schemas.track_schemas import (
-    TrackCreateSchema,
-    TrackResponseSchema,
-)
-
 from services.track_services import TrackCreateManager, TrackPlayManager
 from core.database import get_db
 from core.security import auth

@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Path, Security, Body
+from fastapi import APIRouter, Depends, Security, Body
 from sqlalchemy.orm import Session
-from uuid import UUID
 from typing import List
 
 from schemas.profile_schemas import (

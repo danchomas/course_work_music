@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from models.track_models import Track
+from models.track_model import Track
 from models.profile_model import Profile
 from fastapi import HTTPException
 import os

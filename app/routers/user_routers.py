@@ -1,19 +1,18 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Path, Security, Body
+from fastapi import APIRouter, Depends, HTTPException, Path, Security, Body
 from sqlalchemy.orm import Session
-from uuid import UUID
 from typing import List
 
 from schemas.user_schemas import (
     UserCreateSchema,
     UserLoginSchema,
     UserSchema,
-    UserUpdateSchema
+    UserUpdateSchema,
 )
 from services.user_service import (
     UserCreateManager,
     UserLoginManager,
     UserGetManager,
-    UserUpdateManager
+    UserUpdateManager,
 )
 from core.database import get_db
 from core.security import auth
@@ -29,8 +28,7 @@ async def get_users(db: Session = Depends(get_db)) -> List[UserSchema]:
 
 @router.get("/{user_id}", response_model=UserSchema)
 async def get_user_by_id(
-    user_id: int = Path(...),
-    db: Session = Depends(get_db)
+    user_id: int = Path(...), db: Session = Depends(get_db)
 ) -> UserSchema:
     user = UserGetManager(db).get_user(user_id)
     if not user:
@@ -40,29 +38,22 @@ async def get_user_by_id(
 
 @router.post("/create_user", response_model=UserSchema)
 async def create_user(
-    new_user: UserCreateSchema = Body(...),
-    db: Session = Depends(get_db)
+    new_user: UserCreateSchema = Body(...), db: Session = Depends(get_db)
 ) -> UserSchema:
     user = UserCreateManager(db).create_user(new_user)
     return user
 
 
 @router.post("/login")
-async def login(
-    creds: UserLoginSchema = Body(...),
-    db: Session = Depends(get_db)
-):
+async def login(creds: UserLoginSchema = Body(...), db: Session = Depends(get_db)):
     user = UserLoginManager(db).login_user(creds.username, creds.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    token_values = {
-        "username": user.username,
-        "id": user.id
-    }
+
+    token_values = {"username": user.username, "id": user.id}
     return {
         "access_token": auth.create_access_token(token_values),
-        "token_type": "bearer"
+        "token_type": "bearer",
     }
 
 
@@ -70,11 +61,11 @@ async def login(
 async def update_user(
     creds: UserUpdateSchema = Body(...),
     db: Session = Depends(get_db),
-    payload: dict = Depends(auth.verify_token)
+    payload: dict = Depends(auth.verify_token),
 ):
     user_id = payload.get("id")
     if not user_id:
         raise HTTPException(status_code=401, detail="User ID not found in token")
-    
+
     updated_user = UserUpdateManager(db).update_user(user_id, creds)
     return updated_user
