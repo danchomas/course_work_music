@@ -5,8 +5,8 @@ from routers.profile_routers import router as profile_router
 import uvicorn
 
 app = FastAPI(
-    title="Resonance Music App",
-    descriprion="Music App for new artists",
+    title="Резонанс - Музыкальное Приложение",
+    description="Музыкальное приложение для новых артистов",
 )
 
 app.include_router(tracks_router, prefix="/tracks", tags=["tracks"])
