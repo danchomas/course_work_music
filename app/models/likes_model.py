@@ -5,7 +5,7 @@ from sqlalchemy.orm import relationship
 import uuid
 
 
-class Likes(Base):
+class Like(Base):
     __tablename__ = "likes"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
@@ -16,5 +16,5 @@ class Likes(Base):
         UniqueConstraint("user_id", "track_id", name="unique_user_track_like"),
     )
 
-    user = relationship("Users", back_populates="likes")
-    track = relationship("Tracks", back_populates="likes")
+    user = relationship("User", back_populates="likes", lazy="select")
+    track = relationship("Track", back_populates="likes", lazy="select")
