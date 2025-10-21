@@ -1,5 +1,6 @@
 from fastapi import (
     APIRouter,
+    HTTPException,
     Path,
     UploadFile,
     File,
@@ -10,7 +11,11 @@ from fastapi.responses import JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 
 from routers.user_routers import router
-from services.track_services import TrackCreateManager, TrackPlayManager
+from services.track_services import (
+    TrackCreateManager,
+    TrackGetManager,
+    TrackPlayManager,
+)
 from core.database import get_db
 from core.security import auth
 
@@ -40,3 +45,18 @@ def play_track(
 ):
     track_for_playing = TrackPlayManager(db).play_track(artist_nickname, trackname)
     return FileResponse(track_for_playing, media_type="audio/mpeg")
+
+
+@router.post("/get_track_id")
+def get_track_id(
+    db: Session = Depends(get_db),
+    artist_nickname: str = Form(...),
+    trackname: str = Form(...),
+):
+    track = TrackGetManager(db).get_track_by_id(artist_nickname, trackname)
+    if not track:
+        raise HTTPException(status_code=404, detail="Такой трек не был найден")
+
+    return JSONResponse(
+        status_code=200, content={"message": "Успех", "track_id": str(track.id)}
+    )

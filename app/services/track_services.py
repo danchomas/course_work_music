@@ -67,3 +67,17 @@ class TrackPlayManager:
             raise HTTPException(
                 status_code=404, detail="К сожалению данная композиция не была найдена"
             )
+
+
+class TrackGetManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_track_by_id(self, artist_nickname: str, trackname: str) -> Track:
+        owner = self.db.query(Profile).filter(Profile.nickname == artist_nickname)
+        track = (
+            self.db.query(Track)
+            .filter(Track.owner == owner.id & Track.title == trackname)
+            .first()
+        )
+        return track

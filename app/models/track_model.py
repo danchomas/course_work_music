@@ -1,4 +1,5 @@
 from sqlalchemy import Column, String, Integer, ForeignKey
+from sqlalchemy.orm import relationship
 from core.database import Base
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
@@ -11,3 +12,5 @@ class Track(Base):
     title = Column(String, nullable=False)
     music_file_url = Column(String, unique=True, nullable=False)
     owner = Column(Integer, ForeignKey("profiles.id"), nullable=False)
+
+    likes = relationship("Like", back_populates="track")
