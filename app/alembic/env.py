@@ -13,7 +13,7 @@ from core.database import Base
 from models.user_model import User
 from models.profile_model import Profile
 from models.track_model import Track
-from models.likes_model import Likes
+from models.likes_model import Like
 
 # config - это объект конфигурации Alembic
 config = context.config
