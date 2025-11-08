@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, String, ForeignKey
+from sqlalchemy import Table, Column, String, ForeignKey, Integer
 from core.database import Base
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
@@ -16,5 +16,6 @@ class Playlist(Base):
     __tablename__ = "playlists"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     title = Column(String)
     description = Column(String)
