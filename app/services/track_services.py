@@ -74,10 +74,12 @@ class TrackGetManager:
         self.db = db
 
     def get_track_by_id(self, artist_nickname: str, trackname: str) -> Track:
-        owner = self.db.query(Profile).filter(Profile.nickname == artist_nickname)
+        owner = (
+            self.db.query(Profile).filter(Profile.nickname == artist_nickname).first()
+        )
         track = (
             self.db.query(Track)
-            .filter(Track.owner == owner.id & Track.title == trackname)
+            .filter(Track.owner == owner.id, Track.title == trackname)
             .first()
         )
         return track
