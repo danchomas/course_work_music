@@ -12,9 +12,9 @@ platlist_tacks = Table(
 )
 
 
-class Playlists(Base):
+class Playlist(Base):
     __tablename__ = "playlists"
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String)
-    descriprion = Column(String)
+    description = Column(String)
