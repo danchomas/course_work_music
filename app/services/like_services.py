@@ -23,3 +23,16 @@ class LikesManager:
         self.db.commit()
         self.db.refresh(db_like)
         return db_like
+
+
+class LikesGetManager:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def get_my_likes(self, user_id: int):
+        likes = self.db.query(Like).filter(Like.user_id == user_id).all()
+        if likes:
+            return likes
+        raise HTTPException(
+            status_code=404, detail="Вы еще не поставили ни одного лайка"
+        )
