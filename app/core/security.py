@@ -8,6 +8,7 @@ ALGORITHM = "HS256"
 
 api_key_header = APIKeyHeader(name="Authorization", auto_error=False)
 
+
 class Auth:
     def __init__(self, secret_key: str, algorithm: str):
         self.secret_key = secret_key
@@ -18,15 +19,16 @@ class Auth:
 
     def verify_token(self, api_key: str = Security(api_key_header)):
         if not api_key:
-            raise HTTPException(status_code=403, detail="Could not validate credentials")
+            raise HTTPException(
+                status_code=403, detail="Для выполнения данного действия авторизуйтесь"
+            )
         try:
-            # Убираем "Bearer " из заголовка, если есть
             if api_key.startswith("Bearer "):
                 api_key = api_key[7:]
             payload = jwt.decode(api_key, self.secret_key, algorithms=[self.algorithm])
             return payload
         except jwt.InvalidTokenError:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            raise HTTPException(status_code=401, detail="Токен не может быть прочитан")
 
 
 auth = Auth(SECRET_KEY, ALGORITHM)
