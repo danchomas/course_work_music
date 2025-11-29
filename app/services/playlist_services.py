@@ -1,7 +1,8 @@
 import uuid
-from sqlalchemy.orm import Session
-from models.playlists_model import Playlist, PlaylistTrack
+
 from fastapi import HTTPException
+from models.playlists_model import Playlist, PlaylistTrack
+from sqlalchemy.orm import Session
 
 
 class PlaylistCreateManager:
@@ -30,11 +31,7 @@ class PlaylistGetManager:
         raise HTTPException(status_code=404, detail="у вас еще не нашлось плейлистов")
 
     def get_all_tracks_playlist_id(self, playlist_id: uuid):
-        return (
-            self.db.query(PlaylistTrack)
-            .filter(Playlist.playlist_id == playlist_id)
-            .all()
-        )
+        return self.db.query(PlaylistTrack).filter(Playlist.id == playlist_id).all()
 
 
 class PlaylistTrackManager:

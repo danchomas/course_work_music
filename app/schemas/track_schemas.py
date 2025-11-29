@@ -1,3 +1,5 @@
+import uuid
+
 from pydantic import BaseModel
 
 
@@ -10,3 +12,8 @@ class TrackResponseSchema(BaseModel):
     title: str
     music_file_url: str
     owner_id: int
+
+
+class AddTrackToPlaylistSchema(BaseModel):
+    playlist_id: uuid.UUID
+    track_id: uuid.UUID

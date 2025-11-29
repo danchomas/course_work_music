@@ -1,8 +1,15 @@
-from fastapi import APIRouter, Depends, Body, Form
-from services.playlist_services import PlaylistCreateManager, PlaylistGetManager
-from sqlalchemy.orm import Session
+import uuid
+
 from core.database import get_db
 from core.security import auth
+from fastapi import APIRouter, Body, Depends, Form
+from schemas.track_schemas import AddTrackToPlaylistSchema
+from services.playlist_services import (
+    PlaylistCreateManager,
+    PlaylistGetManager,
+    PlaylistTrackManager,
+)
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -32,3 +39,24 @@ def get_my_playlists(
     payload: dict = Depends(auth.verify_token),
 ):
     return PlaylistGetManager(db).get_my_playlists(payload.get("id"))
+
+
+@router.get("/playlists/{playlist_id}/tracks")
+def get_tracks_from_playlist(
+    playlist_id: uuid.UUID,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(auth.verify_token),
+):
+    playlist = PlaylistGetManager(db).get_all_tracks_playlist_id(playlist_id)
+    return playlist
+
+
+@router.post("/playlists/add_track_to_playlist")
+def add_track(
+    request: AddTrackToPlaylistSchema,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(auth.verify_token),
+):
+    return PlaylistTrackManager(db).add_track_to_playlist(
+        request.track_id, request.playlist_id
+    )
