@@ -1,20 +1,21 @@
 import os
-from logging.config import fileConfig
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
-from alembic import context
 
 # Добавьте импорт ваших моделей и Base
 import sys
+from logging.config import fileConfig
+
+from alembic import context
+from sqlalchemy import engine_from_config, pool
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from core.database import Base
-from models.user_model import User
-from models.profile_model import Profile
-from models.track_model import Track
+from models.album_models import Album, AlbumTrack
 from models.likes_model import Like
 from models.playlists_model import Playlist
+from models.profile_model import Profile
+from models.track_model import Track
+from models.user_model import User
 
 # config - это объект конфигурации Alembic
 config = context.config
