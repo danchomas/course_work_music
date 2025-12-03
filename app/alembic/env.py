@@ -20,6 +20,10 @@ from models.user_model import User
 # config - это объект конфигурации Alembic
 config = context.config
 
+db_url = os.getenv("DATABASE_URL")
+if db_url:
+    config.set_main_option("sqlalchemy.url", db_url)
+
 # Настройка логирования
 fileConfig(config.config_file_name)
 

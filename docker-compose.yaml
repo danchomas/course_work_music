@@ -1,18 +1,55 @@
 version: '3.8'
 
 services:
-  # Сервис MinIO (само хранилище)
+  # 1. База данных PostgreSQL
+  db:
+    image: postgres:15
+    container_name: music_db
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: music_app
+    ports:
+      - "5432:5432" # Оставляем доступ снаружи для DBeaver/PgAdmin
+    volumes:
+      - ./pg_data:/var/lib/postgresql/data # Сохраняем данные на диске
+
+  # 2. Хранилище MinIO
   minio:
     image: minio/minio:latest
     container_name: music_minio
     command: server /data --console-address ":9001"
     ports:
-      - "9000:9000"  # Порт для API (boto3 будет стучаться сюда)
-      - "9001:9001"  # Порт для веб-интерфейса (консоль администратора)
+      - "9000:9000"
+      - "9001:9001"
     environment:
-      MINIO_ROOT_USER: minioadmin      # Логин
-      MINIO_ROOT_PASSWORD: minioadmin  # Пароль
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
     volumes:
-      - ./minio_data:/data             # Папка, где физически будут лежать файлы
+      - ./minio_data:/data
 
-  # Если у тебя база данных тоже в докере, она будет где-то тут...
+  # 3. Твое приложение (Backend)
+  backend:
+    build: . # Строим из Dockerfile в текущей папке
+    container_name: music_backend
+    ports:
+      - "8001:8000" # Пробрасываем порт: снаружи 8001 -> внутри 8000
+    depends_on:
+      - db
+      - minio
+    environment:
+      # Настройки для подключения ВНУТРИ сети Docker
+      # Обрати внимание: хосты называются 'db' и 'minio' (как имена сервисов выше)
+      DATABASE_URL: postgresql://admin:admin@db:5432/music_app
+
+      # Настройки S3
+      S3_ENDPOINT_URL: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin
+      S3_BUCKET_NAME: music-app-bucket
+      S3_REGION_NAME: us-east-1
+
+    # Команда запуска: сначала накатываем миграции, потом запускаем сервер
+    command: >
+      sh -c "alembic upgrade head &&
+             uvicorn main:app --host 0.0.0.0 --port 8000"
