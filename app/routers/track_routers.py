@@ -7,10 +7,9 @@ from fastapi import (
     Form,
     Depends,
 )
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.orm import Session
 
-from routers.user_routers import router
 from services.track_services import (
     TrackCreateManager,
     TrackGetManager,
@@ -43,8 +42,8 @@ def play_track(
     artist_nickname: str = Path(...),
     trackname: str = Path(...),
 ):
-    track_for_playing = TrackPlayManager(db).play_track(artist_nickname, trackname)
-    return FileResponse(track_for_playing, media_type="audio/mpeg")
+    file_stream = TrackPlayManager(db).play_track(artist_nickname, trackname)
+    return StreamingResponse(content=file_stream, media_type="audio/mpeg")
 
 
 @router.post("/get_track_id")

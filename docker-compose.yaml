@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  # Сервис MinIO (само хранилище)
+  minio:
+    image: minio/minio:latest
+    container_name: music_minio
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"  # Порт для API (boto3 будет стучаться сюда)
+      - "9001:9001"  # Порт для веб-интерфейса (консоль администратора)
+    environment:
+      MINIO_ROOT_USER: minioadmin      # Логин
+      MINIO_ROOT_PASSWORD: minioadmin  # Пароль
+    volumes:
+      - ./minio_data:/data             # Папка, где физически будут лежать файлы
+
+  # Если у тебя база данных тоже в докере, она будет где-то тут...
