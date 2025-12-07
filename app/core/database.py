@@ -19,3 +19,5 @@ def get_db() -> Session:
         yield db
     finally:
         db.close()
+
+Base.metadata.create_all(bind=engine)

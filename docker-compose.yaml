@@ -30,7 +30,7 @@ services:
 
   # 3. Твое приложение (Backend)
   backend:
-    build: . # Строим из Dockerfile в текущей папке
+    build: ./app # Строим из Dockerfile в текущей папке
     container_name: music_backend
     ports:
       - "8001:8000" # Пробрасываем порт: снаружи 8001 -> внутри 8000
