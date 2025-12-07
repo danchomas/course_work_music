@@ -16,6 +16,10 @@ greenlet==3.2.4
 h11==0.16.0
 idna==3.10
 jmespath==1.0.1
+<<<<<<< HEAD
+=======
+jwt==1.4.0
+>>>>>>> 18b90c4 (track date time for upload)
 Mako==1.3.10
 MarkupSafe==3.0.3
 marshmallow==4.0.1

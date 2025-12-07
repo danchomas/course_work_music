@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from models.track_model import Track
 from models.profile_model import Profile
@@ -9,7 +10,7 @@ class TrackCreateManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_track(self, title: str, user_id: int, music_file) -> Track:
+    def create_track(self, title: str, user_id: int, music_file, date_and_time: datetime) -> Track:
         owner = self.db.query(Profile).filter(Profile.user_id == user_id).first()
         if not owner:
             raise HTTPException(
@@ -42,6 +43,7 @@ class TrackCreateManager:
             title=title,
             music_file_url=s3_key,
             owner=owner.id,
+            release_date=date_and_time
         )
         self.db.add(db_track)
         self.db.commit()

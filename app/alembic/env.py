@@ -26,7 +26,9 @@ if db_url:
 
 # Настройка логирования
 fileConfig(config.config_file_name)
-
+db_url = os.getenv("DATABASE_URL")
+if db_url:
+    config.set_main_option("sqlalchemy.url", db_url)
 target_metadata = Base.metadata
 
 
