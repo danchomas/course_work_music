@@ -13,8 +13,6 @@ class Track(Base):
     music_file_url = Column(String, unique=True, nullable=False)
     owner = Column(Integer, ForeignKey("profiles.id"), nullable=False)
 
-    # Изменили Date на DateTime, чтобы хранить время
-    # Исправили опечатку realese -> release
     release_date = Column(DateTime, nullable=False, default=datetime.now)
 
     likes = relationship("Like", back_populates="track")

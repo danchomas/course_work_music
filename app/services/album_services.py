@@ -20,6 +20,9 @@ class AlbumCreateManager:
         self.db.refresh(db_album)
         return db_album
 
+    def autocreate_album(self, title: str, user_id: int) -> Album:
+
+
 class AlbumManager:
     def __init__(self, db: Session):
         self.db = db
