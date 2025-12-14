@@ -8,7 +8,7 @@ class Genres(PyEnum):
     ROCK = "rock"
     CLASSIC = "classic"
     ELECTRO = "electro"
-    SHANSON = "SHANSON"
+    SHANSON = "shanson  "
 
 class TrackGenre(Base):
     __tablename__ = "track_genres"
