@@ -49,6 +49,15 @@ class AlbumCreateManager:
         self.db.refresh(db_album)
         return db_album
 
+    def autocreate_album_for_single(self, track_title, profile_id, track_id):
+        db_album = Album(title=track_title, owner_id=profile_id)
+        self.db.add(db_album)
+        track_album_link = AlbumTrack(album_id=db_album.id, track_id=track_id)
+        self.db.add(track_album_link)
+        self.db.commit()
+        self.db.refresh(db_album)
+        return db_album
+
 
 class AlbumManager:
     def __init__(self, db: Session):

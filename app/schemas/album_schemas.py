@@ -1,9 +1,11 @@
 import uuid
+from fastapi import UploadFile, File
 from pydantic import BaseModel
-from typing import List, Optional
+from typing import List
 
 class AlbumCreateSchema(BaseModel):
     title: str
+    cover_file: UploadFile = File(...)
 
 class AlbumTrackAddSchema(BaseModel):
     album_id: uuid.UUID

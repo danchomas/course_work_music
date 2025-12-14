@@ -1,23 +1,24 @@
-from fastapi import APIRouter, Depends, Body, Security
+from fastapi import APIRouter, Depends, Body, Security, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
 
 from core.database import get_db
 from core.security import auth
-from schemas.album_schemas import AlbumCreateSchema, AlbumResponseSchema, AlbumTrackAddSchema
+from schemas.album_schemas import AlbumResponseSchema, AlbumTrackAddSchema
 from services.album_services import AlbumCreateManager, AlbumGetManager, AlbumManager
 
 router = APIRouter()
 
 @router.post("/create", response_model=AlbumResponseSchema)
 def create_album(
-    album: AlbumCreateSchema = Body(...),
+    title: str = Form(...),
+    cover_file: UploadFile = File(...),
     db: Session = Depends(get_db),
     payload: dict = Depends(auth.verify_token)
 ):
     user_id = payload.get("id")
-    return AlbumCreateManager(db).create_album(album.title, user_id)
+    return AlbumCreateManager(db).create_album(title, cover_file, user_id)
 
 @router.post("/add_track")
 def add_track_to_album(
