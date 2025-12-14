@@ -11,6 +11,8 @@ class Album(Base):
     title = Column(String, nullable=False)
     owner_id = Column(Integer, ForeignKey("profiles.id"))
 
+    cover_id = Column(UUID(as_uuid=True), ForeignKey("titles.id"))
+
 
 class AlbumTrack(Base):
     __tablename__ = "album_track"

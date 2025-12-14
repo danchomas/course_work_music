@@ -7,15 +7,15 @@ from fastapi import (
     Form,
     Depends,
 )
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 
+from routers.user_routers import router
 from services.track_services import (
     TrackCreateManager,
     TrackGetManager,
     TrackPlayManager,
 )
-from datetime import datetime
 from core.database import get_db
 from core.security import auth
 
@@ -26,39 +26,14 @@ router = APIRouter()
 def upload_track(
     file: UploadFile = File(...),
     title: str = Form(...),
-    day: int = Form(..., ge=1, le=31, description="День (1-31)"),
-    month: int = Form(..., ge=1, le=12, description="Месяц (1-12)"),
-    year: int = Form(..., ge=1900, le=2100, description="Год"),
-    hour: int = Form(0, ge=0, le=23, description="Час (0-23)"),
-    minute: int = Form(0, ge=0, le=59, description="Минута (0-59)"),
     db: Session = Depends(get_db),
     payload: dict = Depends(auth.verify_token),
 ):
     user_id = payload.get("id")
-
-    try:
-        release_date = datetime(
-            year=year,
-            month=month,
-            day=day,
-            hour=hour,
-            minute=minute
-        )
-    except ValueError as e:
-        raise HTTPException(
-            status_code=400,
-            detail=f"Некорректная дата: {str(e)}"
-        )
-
-    track = TrackCreateManager(db).create_track(title, user_id, file, release_date)
-
+    track = TrackCreateManager(db).create_track(title, user_id, file)
     return JSONResponse(
         status_code=200,
-        content={
-            "message": "Файл успешно загружен",
-            "track_id": str(track.id),
-            "release_date": release_date.strftime('%Y-%m-%d %H:%M')
-        },
+        content={"message": "Файл успешно загружен", "track_id": str(track.id)},
     )
 
 
@@ -68,8 +43,8 @@ def play_track(
     artist_nickname: str = Path(...),
     trackname: str = Path(...),
 ):
-    file_stream = TrackPlayManager(db).play_track(artist_nickname, trackname)
-    return StreamingResponse(content=file_stream, media_type="audio/mpeg")
+    track_for_playing = TrackPlayManager(db).play_track(artist_nickname, trackname)
+    return FileResponse(track_for_playing, media_type="audio/mpeg")
 
 
 @router.post("/get_track_id")

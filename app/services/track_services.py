@@ -1,49 +1,50 @@
-from datetime import datetime
 from sqlalchemy.orm import Session
 from models.track_model import Track
 from models.profile_model import Profile
 from fastapi import HTTPException
-from core.s3_client import s3
-import uuid
+import os
+
+BASE_DIR = "files"
+
 
 class TrackCreateManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_track(self, title: str, user_id: int, music_file, date_and_time: datetime) -> Track:
+    def create_track(self, track: str, user_id, music_file) -> Track:
         owner = self.db.query(Profile).filter(Profile.user_id == user_id).first()
         if not owner:
             raise HTTPException(
                 status_code=401,
                 detail="У вас нету профиля артиста. Перед загрузкой треков, создайте себе профиль",
             )
-
         existing_track = (
             self.db.query(Track)
-            .filter(Track.owner == owner.id, Track.title == title)
+            .filter(Track.owner == owner.id, Track.title == track)
             .first()
         )
         if existing_track:
             raise HTTPException(
                 status_code=409,
-                detail="У вашего профиля был обнаружен трек с таким же названием.",
+                detail="У вашего профиля был обнаружен трек с таким же названием. Придумайте новое, это не допускается",
             )
 
-        file_extension = music_file.filename.split('.')[-1]
-        unique_filename = f"{uuid.uuid4()}.{file_extension}"
+        owner_nickname = (
+            self.db.query(Profile.nickname).filter(Profile.id == owner.id).scalar()
+        )
 
-        s3_key = f"{owner.nickname}/{title}/{unique_filename}"
+        music_file_path = os.path.join(
+            BASE_DIR, owner_nickname, track, music_file.filename
+        )
+        os.makedirs(os.path.dirname(music_file_path), exist_ok=True)
 
-        try:
-            s3.upload_file(music_file.file, s3_key)
-        except Exception:
-            raise HTTPException(status_code=500, detail="Не удалось загрузить файл в облачное хранилище")
+        with open(music_file_path, "wb") as buffer:
+            buffer.write(music_file.file.read())
 
         db_track = Track(
-            title=title,
-            music_file_url=s3_key,
+            title=track,
+            music_file_url=music_file_path,
             owner=owner.id,
-            release_date=date_and_time
         )
         self.db.add(db_track)
         self.db.commit()
@@ -56,20 +57,16 @@ class TrackPlayManager:
         self.db = db
 
     def play_track(self, artist_nickname, trackname):
-        owner = self.db.query(Profile).filter(Profile.nickname == artist_nickname).first()
-        if not owner:
-            raise HTTPException(status_code=404, detail="Артист не найден")
-
-        track = self.db.query(Track).filter(Track.owner == owner.id, Track.title == trackname).first()
-        if not track:
-            raise HTTPException(status_code=404, detail="Трек не найден")
-
-        file_stream = s3.get_file_object(track.music_file_url)
-
-        if not file_stream:
-            raise HTTPException(status_code=500, detail="Ошибка чтения файла из облака")
-
-        return file_stream
+        file_path = os.path.join("files", artist_nickname, trackname)
+        if os.path.exists(file_path):
+            for file in os.listdir(file_path):
+                if file.endswith(".mp3"):
+                    mp3_file = os.path.join(file_path, file)
+                    return mp3_file
+        else:
+            raise HTTPException(
+                status_code=404, detail="К сожалению данная композиция не была найдена"
+            )
 
 
 class TrackGetManager:
@@ -80,9 +77,6 @@ class TrackGetManager:
         owner = (
             self.db.query(Profile).filter(Profile.nickname == artist_nickname).first()
         )
-        if not owner:
-             raise HTTPException(status_code=404, detail="Артист не найден")
-
         track = (
             self.db.query(Track)
             .filter(Track.owner == owner.id, Track.title == trackname)
