@@ -17,6 +17,7 @@ from models.profile_model import Profile
 from models.track_model import Track
 from models.user_model import User
 from models.title_models import Title
+from models.genre_models import Genres, TrackGenre
 
 # config - это объект конфигурации Alembic
 config = context.config
