@@ -10,15 +10,14 @@ from services.album_services import AlbumCreateManager, AlbumGetManager, AlbumMa
 
 router = APIRouter()
 
-@router.post("/create", response_model=AlbumResponseSchema)
+@router.post("/create")
 def create_album(
     title: str = Form(...),
-    cover_file: UploadFile = File(...),
     db: Session = Depends(get_db),
     payload: dict = Depends(auth.verify_token)
 ):
     user_id = payload.get("id")
-    return AlbumCreateManager(db).create_album(title, cover_file, user_id)
+    return AlbumCreateManager(db).create_album(title, user_id)
 
 @router.post("/add_track")
 def add_track_to_album(

@@ -2,12 +2,10 @@ import uuid
 import os
 from sqlalchemy.orm import Session
 from models.title_models import Title
-from models.profile_model import Profile
-from fastapi import HTTPException
 
 BASE_DIR = "files"
 
-class CoverCreateService:
+class TitleCreateService:
     def __init__(self, db: Session):
         self.db = db
 

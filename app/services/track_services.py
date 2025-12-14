@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from models.track_model import Track
 from models.profile_model import Profile
 from fastapi import HTTPException
-from .title_services import CoverCreateService
+from .title_services import TitleCreateService
 from .album_services import AlbumCreateManager
 import os
 
@@ -50,7 +50,7 @@ class TrackCreateManager:
         )
         self.db.add(db_track)
         album = AlbumCreateManager(self.db).autocreate_album_for_single(track, owner.id, db_track.id)
-        CoverCreateService(self.db).create_cover_file(owner_nickname, cover_file, track, album.id)
+        TitleCreateService(self.db).create_cover_file(owner_nickname, cover_file, track, album.id)
         self.db.commit()
         self.db.refresh(db_track)
         return db_track

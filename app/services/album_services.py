@@ -9,53 +9,28 @@ class AlbumCreateManager:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_album(self, title: str, user_id: int, track_ids: list[uuid.UUID] = None) -> Album:
+    def create_album(self, title: str, user_id: int) -> Album:
         profile = self.db.query(Profile).filter(Profile.user_id == user_id).first()
         if not profile:
             raise HTTPException(status_code=403, detail="Только артисты с профилем могут создавать альбомы")
 
         db_album = Album(title=title, owner_id=profile.id)
         self.db.add(db_album)
-        self.db.flush()
-
-        if track_ids:
-            for track_id in track_ids:
-                track = self.db.query(Track).filter(
-                    Track.id == track_id,
-                    Track.owner == profile.id
-                ).first()
-
-                if not track:
-                    self.db.rollback()
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Трек {track_id} не найден или не принадлежит вам"
-                    )
-
-                existing_link = self.db.query(AlbumTrack).filter(
-                    AlbumTrack.album_id == db_album.id,
-                    AlbumTrack.track_id == track_id
-                ).first()
-
-                if not existing_link:
-                    new_link = AlbumTrack(
-                        id=uuid.uuid4(),
-                        album_id=db_album.id,
-                        track_id=track_id
-                    )
-                    self.db.add(new_link)
-
         self.db.commit()
         self.db.refresh(db_album)
         return db_album
 
     def autocreate_album_for_single(self, track_title, profile_id, track_id):
         db_album = Album(title=track_title, owner_id=profile_id)
+
         self.db.add(db_album)
+
         track_album_link = AlbumTrack(album_id=db_album.id, track_id=track_id)
+
         self.db.add(track_album_link)
         self.db.commit()
         self.db.refresh(db_album)
+
         return db_album
 
 
@@ -76,6 +51,8 @@ class AlbumManager:
         if not track:
             raise HTTPException(status_code=404, detail="Трек не найден")
 
+
+
         existing_link = self.db.query(AlbumTrack).filter(
             AlbumTrack.album_id == album_id,
             AlbumTrack.track_id == track_id
@@ -86,6 +63,11 @@ class AlbumManager:
 
         new_link = AlbumTrack(id=uuid.uuid4(), album_id=album_id, track_id=track_id)
         self.db.add(new_link)
+
+        previous_album = self.db.query(AlbumTrack).filter(AlbumTrack.track_id == track_id).first()
+        if previous_album:
+            self.db.delete(previous_album)
+
         self.db.commit()
         return {"status": "Успех", "message": "Трек успешно добавлен"}
 
