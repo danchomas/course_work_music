@@ -24,13 +24,14 @@ router = APIRouter()
 
 @router.post("/upload_track")
 def upload_track(
-    file: UploadFile = File(...),
-    title: str = Form(...),
+    music_file: UploadFile = File(...),
+    cover_file: UploadFile = File(...),
+    title_track: str = Form(...),
     db: Session = Depends(get_db),
     payload: dict = Depends(auth.verify_token),
 ):
     user_id = payload.get("id")
-    track = TrackCreateManager(db).create_track(title, user_id, file)
+    track = TrackCreateManager(db).create_track(title_track, user_id, music_file, cover_file)
     return JSONResponse(
         status_code=200,
         content={"message": "Файл успешно загружен", "track_id": str(track.id)},
