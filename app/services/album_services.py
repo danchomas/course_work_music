@@ -1,7 +1,7 @@
 import uuid
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
-from models.album_models import Album, AlbumTrack
+from models.album_models import Album, AlbumRating, AlbumTrack
 from models.track_model import Track
 from models.profile_model import Profile
 
@@ -99,3 +99,19 @@ class AlbumGetManager:
         if not profile:
             return []
         return self.db.query(Album).filter(Album.owner_id == profile.id).all()
+
+
+class AlbumRateService:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def rate_album(self, user_id: int, album_id: uuid.UUID, rating: int) -> AlbumRating:
+        existing_rating = self.db.query(AlbumRating).filter(AlbumRating.user_id == user_id, AlbumRating.album_id == album_id).first()
+        if existing_rating:
+            raise HTTPException(status_code=403, detail="вы уже оценивали данный альбом")
+
+        db_rating = AlbumRating(user_id=user_id, album_id=album_id, rating=rating)
+        self.db.add(db_rating)
+        self.db.commit()
+        self.db.refresh(db_rating)
+        return db_rating

@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Body, Security, Form, UploadFile, File
+from fastapi import APIRouter, Depends, Body, HTTPException, Security, Form, UploadFile, File
 from sqlalchemy.orm import Session
 from typing import List
 import uuid
@@ -6,7 +6,7 @@ import uuid
 from core.database import get_db
 from core.security import auth
 from schemas.album_schemas import AlbumResponseSchema, AlbumTrackAddSchema
-from services.album_services import AlbumCreateManager, AlbumGetManager, AlbumManager
+from services.album_services import AlbumCreateManager, AlbumGetManager, AlbumManager, AlbumRateService
 
 router = APIRouter()
 
@@ -46,3 +46,17 @@ def get_album_details(
     db: Session = Depends(get_db)
 ):
     return AlbumGetManager(db).get_album_by_id(album_id)
+
+@router.post("rate_album")
+def rate_the_album(
+    album_id: uuid.UUID,
+    rating: int,
+    db: Session = Depends(get_db),
+    payload: dict = Depends(auth.verify_token),
+):
+    user_id = payload.get("id")
+    if not user_id:
+        raise HTTPException(status_code=401, detail="вы не авторизованы")
+
+    rating = AlbumRateService(db).rate_album(user_id, album_id, rating)
+    return rating
