@@ -34,7 +34,7 @@ async def get_user_by_id(
 ) -> UserSchema:
     user = UserGetManager(db).get_user(user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail="такого пользователя не существует")
     return user
 
 
@@ -53,7 +53,7 @@ async def create_user(
 async def login(creds: UserLoginSchema = Body(...), db: Session = Depends(get_db)):
     user = UserLoginManager(db).login_user(creds.username, creds.password)
     if not user:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
+        raise HTTPException(status_code=401, detail="Неправильный логин или пароль")
 
     token_values = {"username": user.username, "id": user.id}
     return {
@@ -70,7 +70,7 @@ async def update_user(
 ):
     user_id = payload.get("id")
     if not user_id:
-        raise HTTPException(status_code=401, detail="User ID not found in token")
+        raise HTTPException(status_code=401, detail="вы передали невалидный токен")
 
     updated_user = UserUpdateManager(db).update_user(user_id, creds)
     return updated_user
