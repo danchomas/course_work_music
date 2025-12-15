@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from models.likes_model import Like
+from models.playlists_model import Playlist
 from fastapi import HTTPException
 import uuid
 
@@ -36,3 +37,13 @@ class LikesGetManager:
         raise HTTPException(
             status_code=404, detail="Вы еще не поставили ни одного лайка"
         )
+
+class LikesAsPlaylist:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def create_likes_playlist(self, user_id):
+        db_likes_playlist = Playlist(owner_id=user_id, title="Лайки")
+        self.db.add(db_likes_playlist)
+        self.db.commit()
+        self.db.refresh(db_likes_playlist)

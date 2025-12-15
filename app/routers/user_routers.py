@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Path, Security, Body
 from sqlalchemy.orm import Session
 from typing import List
 
+from services.like_services import LikesAsPlaylist
 from schemas.user_schemas import (
     UserCreateSchema,
     UserLoginSchema,
@@ -14,6 +15,7 @@ from services.user_service import (
     UserGetManager,
     UserUpdateManager,
 )
+from services.listening_history_services import ListeningHistoryService
 from core.database import get_db
 from core.security import auth
 
@@ -41,6 +43,9 @@ async def create_user(
     new_user: UserCreateSchema = Body(...), db: Session = Depends(get_db)
 ) -> UserSchema:
     user = UserCreateManager(db).create_user(new_user)
+    if user:
+        ListeningHistoryService(db).create_listening_history_as_playlist(user.id)
+        LikesAsPlaylist(db).create_likes_playlist(user.id)
     return user
 
 

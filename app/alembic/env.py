@@ -18,6 +18,7 @@ from models.track_model import Track
 from models.user_model import User
 from models.title_models import Title
 from models.genre_models import Genres, TrackGenre
+from models.listening_history_model import ListeningHistory
 
 # config - это объект конфигурации Alembic
 config = context.config
