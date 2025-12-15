@@ -1,6 +1,9 @@
+import uuid
 from sqlalchemy.orm import Session
-from models.track_model import Track
+from starlette.types import HTTPExceptionHandler
+from models.track_model import Track, TrackRatings
 from models.profile_model import Profile
+from models.track_model import TrackRatings
 from fastapi import HTTPException
 from .title_services import TitleCreateService
 from .album_services import AlbumCreateManager
@@ -87,3 +90,22 @@ class TrackGetManager:
             .first()
         )
         return track
+
+
+class TrackRateService:
+    def __init__(self, db: Session):
+        self.db = db
+
+    def rate_track(self, user_id: int, track_id: str, rating: int) -> TrackRatings:
+        if rating > 10 or rating < 1:
+            raise HTTPException(status_code=402, detail="оценка должна быть от 1 до 10")
+
+        existent_relationship = self.db.query(TrackRatings).filter(TrackRatings.user_id == user_id, TrackRatings.track_id == track_id).first()
+        if existent_relationship:
+            raise HTTPException(status_code=402, detail="вы уже оценивали данный трек")
+
+        db_rating = TrackRatings(user_id=user_id, track_id=track_id, rating=rating)
+        self.db.add(db_rating)
+        self.db.commit()
+        self.db.refresh(db_rating)
+        return db_rating

@@ -1,3 +1,4 @@
+import uuid
 from fastapi import (
     APIRouter,
     HTTPException,
@@ -10,11 +11,13 @@ from fastapi import (
 from fastapi.responses import JSONResponse, FileResponse
 from sqlalchemy.orm import Session
 
+from models.track_model import TrackRatings
 from routers.user_routers import router
 from services.track_services import (
     TrackCreateManager,
     TrackGetManager,
     TrackPlayManager,
+    TrackRateService,
 )
 from core.database import get_db
 from core.security import auth
@@ -61,3 +64,20 @@ def get_track_id(
     return JSONResponse(
         status_code=200, content={"message": "Успех", "track_id": str(track.id)}
     )
+
+
+@router.post("/rate_track")
+def rate_the_track(
+    rating: int = Form(...),
+    track_id: str = Form(...),
+    db: Session = Depends(get_db),
+    payload: dict = Depends(auth.verify_token)
+):
+    user_id = payload.get("id")
+    if not user_id:
+        raise HTTPException(
+            status_code=401,
+            detail="для оценки трека необходимо авторизоваться"
+        )
+    track_rating = TrackRateService(db).rate_track(user_id, track_id, rating)
+    return track_rating
