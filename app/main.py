@@ -6,6 +6,7 @@ from routers.likes_routers import router as like_router
 from routers.playlist_routers import router as playlist_router
 from routers.album_routers import router as album_router
 from routers.genres_routers import router as genres_router
+from routers.export_routers import router as export_router
 import uvicorn
 
 app = FastAPI(
@@ -13,6 +14,7 @@ app = FastAPI(
     description="Музыкальное приложение для новых артистов",
 )
 
+app.include_router(export_router, prefix="/export", tags=["export"])
 app.include_router(genres_router, prefix="/genres", tags=["genres"])
 app.include_router(playlist_router, prefix="/playlists", tags=["playlists"])
 app.include_router(like_router, prefix="/likes", tags=["likes"])
