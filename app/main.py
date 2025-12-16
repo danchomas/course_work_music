@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from routers.track_routers import router as tracks_router
 from routers.user_routers import router as user_router
 from routers.profile_routers import router as profile_router
@@ -12,6 +13,14 @@ import uvicorn
 app = FastAPI(
     title="Резонанс - Музыкальное Приложение",
     description="Музыкальное приложение для новых артистов",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 app.include_router(export_router, prefix="/export", tags=["export"])
